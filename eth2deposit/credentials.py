@@ -33,7 +33,7 @@ class Credential:
     Once created, it is the only object that should be required to perform any processing for a validator.
     """
     def __init__(self, *, mnemonic: str, mnemonic_password: str,
-                 index: int, amount: int, chain_setting: BaseChainSetting):
+                 index: int, amount: int, chain_setting: BaseChainSetting, withdrawal_pk: str):
         # Set path as EIP-2334 format
         # https://eips.ethereum.org/EIPS/eip-2334
         purpose = '12381'
@@ -41,7 +41,10 @@ class Credential:
         account = str(index)
         withdrawal_key_path = f'm/{purpose}/{coin_type}/{account}/0'
         self.signing_key_path = f'{withdrawal_key_path}/0'
-
+        if withdrawal_pk:
+            self.custom_withdrawal_pk = bytes.fromhex(withdrawal_pk)
+        else:
+            self.custom_withdrawal_pk = ''
         self.withdrawal_sk = mnemonic_and_path_to_key(
             mnemonic=mnemonic, path=withdrawal_key_path, password=mnemonic_password)
         self.signing_sk = mnemonic_and_path_to_key(
@@ -60,7 +63,10 @@ class Credential:
     @property
     def withdrawal_credentials(self) -> bytes:
         withdrawal_credentials = BLS_WITHDRAWAL_PREFIX
-        withdrawal_credentials += SHA256(self.withdrawal_pk)[1:]
+        if self.custom_withdrawal_pk:
+            withdrawal_credentials += SHA256(self.custom_withdrawal_pk)[1:]
+        else:
+            withdrawal_credentials += SHA256(self.withdrawal_pk)[1:]
         return withdrawal_credentials
 
     @property
@@ -129,7 +135,8 @@ class CredentialList:
                       num_keys: int,
                       amounts: List[int],
                       chain_setting: BaseChainSetting,
-                      start_index: int) -> 'CredentialList':
+                      start_index: int,
+                      withdrawal_pk: str) -> 'CredentialList':
         if len(amounts) != num_keys:
             raise ValueError(
                 f"The number of keys ({num_keys}) doesn't equal to the corresponding deposit amounts ({len(amounts)})."
@@ -138,7 +145,7 @@ class CredentialList:
         with click.progressbar(key_indices, label='Creating your keys:\t\t',
                                show_percent=False, show_pos=True) as indices:
             return cls([Credential(mnemonic=mnemonic, mnemonic_password=mnemonic_password,
-                                   index=index, amount=amounts[index - start_index], chain_setting=chain_setting)
+                                   index=index, amount=amounts[index - start_index], chain_setting=chain_setting, withdrawal_pk=withdrawal_pk)
                         for index in indices])
 
     def export_keystores(self, password: str, folder: str) -> List[str]:
