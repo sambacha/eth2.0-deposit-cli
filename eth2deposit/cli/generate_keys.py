@@ -100,7 +100,7 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
 @click.command()
 @click.pass_context
 def generate_keys(ctx: click.Context, validator_start_index: int,
-                  num_validators: int, folder: str, chain: str, keystore_password: str, withdrawal_pk: str, **kwargs: Any) -> None:
+                  num_validators: int, folder: str, chain: str, keystore_password: str, withdrawal_pk: str, withdrawal_credentials: str, **kwargs: Any) -> None:
     mnemonic = ctx.obj['mnemonic']
     mnemonic_password = ctx.obj['mnemonic_password']
     amounts = [MAX_DEPOSIT_AMOUNT] * num_validators
@@ -108,8 +108,9 @@ def generate_keys(ctx: click.Context, validator_start_index: int,
     chain_setting = get_chain_setting(chain)
     if not os.path.exists(folder):
         os.mkdir(folder)
-    click.clear()
-    click.echo(RHINO_0)
+    if not withdrawal_pk and not withdrawal_credentials:
+      click.clear()
+      click.echo(RHINO_0)
     click.echo('Creating your keys.')
     credentials = CredentialList.from_mnemonic(
         mnemonic=mnemonic,
@@ -118,7 +119,8 @@ def generate_keys(ctx: click.Context, validator_start_index: int,
         amounts=amounts,
         chain_setting=chain_setting,
         start_index=validator_start_index,
-        withdrawal_pk=withdrawal_pk
+        withdrawal_pk=withdrawal_pk,
+        withdrawal_credentials=withdrawal_credentials
     )
     keystore_filefolders = credentials.export_keystores(password=keystore_password, folder=folder)
     deposits_file = credentials.export_deposit_data_json(folder=folder)
@@ -126,5 +128,6 @@ def generate_keys(ctx: click.Context, validator_start_index: int,
         raise ValidationError("Failed to verify the keystores.")
     if not verify_deposit_data_json(deposits_file):
         raise ValidationError("Failed to verify the deposit data JSON files.")
-    click.echo('\nSuccess!\nYour keys can be found at: %s' % folder)
-    click.pause('\n\nPress any key.')
+    if not withdrawal_pk and not withdrawal_credentials:
+      click.echo('\nSuccess!\nYour keys can be found at: %s' % folder)
+      click.pause('\n\nPress any key.')
