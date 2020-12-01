@@ -56,8 +56,18 @@ def validate_mnemonic(cts: click.Context, param: Any, mnemonic: str) -> str:
             'For example, if you\'ve generated 4 keys in the past, you\'d enter 4 here,'),
     type=click.IntRange(0, 2**32 - 1),
 )
+@click.option(
+    '--withdrawal_pk',
+    default='',
+    help=('Custom private key to generate withdrawal credentials. This one will be used for all generated keys.'),
+)
+@click.option(
+    '--withdrawal_credentials',
+    default='',
+    help=('Custom withdrawal credentials. Overrides withdrawal_pk. This one will be used for all generated keys.'),
+)
 @generate_keys_arguments_decorator
-def existing_mnemonic(ctx: click.Context, mnemonic: str, mnemonic_password: str, **kwargs: Any) -> None:
+def existing_mnemonic(ctx: click.Context, mnemonic: str, mnemonic_password: str, withdrawal_pk: str, withdrawal_credentials: str, **kwargs: Any) -> None:
     if mnemonic_password != '':
         click.clear()
         click.confirm(
@@ -66,5 +76,5 @@ def existing_mnemonic(ctx: click.Context, mnemonic: str, mnemonic_password: str,
              'Using one when you are not supposed to can result in loss of funds!'),
             abort=True)
 
-    ctx.obj = {'mnemonic': mnemonic, 'mnemonic_password': mnemonic_password}
+    ctx.obj = {'mnemonic': mnemonic, 'mnemonic_password': mnemonic_password, 'withdrawal_pk': withdrawal_pk, 'withdrawal_credentials': withdrawal_credentials}
     ctx.forward(generate_keys)
