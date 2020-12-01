@@ -26,6 +26,25 @@ from eth2deposit.utils.ssz import (
     DepositMessage,
 )
 
+def validate_withdrawal_credentials(withdrawal_credentials: str) -> bytes:
+    try:
+        decoded_withdrawal_credentials = bytes.fromhex(withdrawal_credentials)
+    except Exception:
+        raise ValueError("Wrong withdrawal_credentials value. Is it HEX (not Base64) format?")
+    if len(decoded_withdrawal_credentials) != 32:
+        raise ValidationError("Wrong withdrawal_credentials length. Must be 32 bytes (64 hex symbols).")
+    if decoded_withdrawal_credentials[:1] != BLS_WITHDRAWAL_PREFIX:
+        raise ValidationError("Wrong withdrawal_credentials format.")
+    return decoded_withdrawal_credentials
+
+def validate_withdrawal_pk(withdrawal_pk: str) -> bytes:
+    try:
+        decoded_withdrawal_pk = bytes.fromhex(withdrawal_pk)
+    except Exception:
+        raise ValueError("Wrong withdrawal_pk value. Is it HEX (not Base64) format?")
+    if len(decoded_withdrawal_pk) != 48:
+        raise ValidationError("Wrong withdrawal_pk length. Must be 48 bytes (96 hex symbols).")
+    return decoded_withdrawal_pk
 
 class Credential:
     """
@@ -41,14 +60,16 @@ class Credential:
         account = str(index)
         withdrawal_key_path = f'm/{purpose}/{coin_type}/{account}/0'
         self.signing_key_path = f'{withdrawal_key_path}/0'
+        if withdrawal_pk and withdrawal_credentials:
+            raise ValidationError("Simultaneous use of withdrawal_credentials and withdrawal_pk is incompatible. Use only one of them.")
         if withdrawal_pk:
-            self.custom_withdrawal_pk = bytes.fromhex(withdrawal_pk)
+            self.custom_withdrawal_pk = validate_withdrawal_pk(withdrawal_pk=withdrawal_pk)
         else:
-            self.custom_withdrawal_pk = ''
+            self.custom_withdrawal_pk = None
         if withdrawal_credentials:
-            self.custom_withdrawal_credentials = bytes.fromhex(withdrawal_credentials)
+            self.custom_withdrawal_credentials = validate_withdrawal_credentials(withdrawal_credentials=withdrawal_credentials)
         else:
-            self.custom_withdrawal_credentials = ''
+            self.custom_withdrawal_credentials = None
         self.withdrawal_sk = mnemonic_and_path_to_key(
             mnemonic=mnemonic, path=withdrawal_key_path, password=mnemonic_password)
         self.signing_sk = mnemonic_and_path_to_key(

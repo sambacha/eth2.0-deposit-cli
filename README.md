@@ -126,8 +126,8 @@ You can use `existing-mnemonic --help` to see all arguments. Note that if there 
 | Argument | Type | Description |
 | -------- | -------- | -------- |
 | `--mnemonic`  | Quoted string | Optional. Valid custom mnemonic. |
-| `--withdrawal_pk`  | Hex string w/o leading `0x` | Optional. Custom public key for withdrawal credentials. Will be same for all keys. |
-| `--withdrawal_credentials`  | Hex string w/o leading `0x` | Optional. Custom withdrawal credentials. Overrides `withdrawal_pk`. Will be same for all keys. |
+| `--withdrawal_pk`  | 96 hex symbols string w/o leading `0x` | Optional. Custom public key for withdrawal credentials.  Incompatible with  `--withdrawal_credentials`. Will be same for all keys. |
+| `--withdrawal_credentials`  | 64 symbols hex string w/o leading `0x` | Optional. Custom withdrawal credentials. Incompatible with  `--withdrawal_pk`. Will be same for all keys. |
 | `--validator_start_index` | Non-negative integer | The index of the first validator's keys you wish to generate. If this is your first time generating keys with this mnemonic, use 0. If you have generated keys using this mnemonic before, use the next index from which you want to start generating keys from (eg, if you've generated 4 keys before (keys #0, #1, #2, #3), then enter 4 here.|
 | `--num_validators`  | Non-negative integer | The number of signing keys you want to generate. Note that the child key(s) are generated via the same master key. |
 | `--folder` | String. Pointing to `./validator_keys` by default | The folder path for the keystore(s) and deposit(s) |
