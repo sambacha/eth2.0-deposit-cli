@@ -163,8 +163,8 @@ class CredentialList:
                       amounts: List[int],
                       chain_setting: BaseChainSetting,
                       start_index: int,
-                      withdrawal_pk: str,
-                      withdrawal_credentials: str) -> 'CredentialList':
+                      withdrawal_pk: str = None,
+                      withdrawal_credentials: str = None) -> 'CredentialList':
         if len(amounts) != num_keys:
             raise ValueError(
                 f"The number of keys ({num_keys}) doesn't equal to the corresponding deposit amounts ({len(amounts)})."

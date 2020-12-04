@@ -105,7 +105,7 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
 @click.command()
 @click.pass_context
 def generate_keys(ctx: click.Context, validator_start_index: int,
-                  num_validators: int, folder: str, chain: str, keystore_password: str, withdrawal_pk: str, withdrawal_credentials: str, quiet: bool, **kwargs: Any) -> None:
+                  num_validators: int, folder: str, chain: str, keystore_password: str, withdrawal_pk: str = None, withdrawal_credentials: str = None, quiet: bool = False, **kwargs: Any) -> None:
     mnemonic = ctx.obj['mnemonic']
     mnemonic_password = ctx.obj['mnemonic_password']
     amounts = [MAX_DEPOSIT_AMOUNT] * num_validators
