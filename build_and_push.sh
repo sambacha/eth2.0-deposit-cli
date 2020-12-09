@@ -2,13 +2,20 @@
 source ./.env
 set -e +u
 set -o pipefail
-TAG="v1.1.0-lido.2"
+
+TAG=${TAG:-"v0.1.0"}
 IMG="lidofinance/deposit-cli"
 export DOCKER_CONFIG=$HOME/.lidofinance
 
-echo "Building oracle Docker image..."
-docker build -t "$IMG:$TAG" .
+if [ -d .git ]
+then
+  TAG=$(git tag --points-at HEAD)
+fi
 
-echo "Pushing image to the Docker Hub"
-docker push "$IMG:$TAG"
-docker tag "$IMG:$TAG" "$IMG:latest"
+echo "Building $IMG:$TAG Docker image..."
+docker build -t $IMG:$TAG .
+
+echo "Pushing $IMG:$TAG to the Docker Hub"
+docker push $IMG:$TAG
+docker tag $IMG:$TAG $IMG:latest
+docker push $IMG:latest
