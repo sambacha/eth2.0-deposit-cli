@@ -92,8 +92,18 @@ def generate_keys_arguments_decorator(function: Callable[..., Any]) -> Callable[
             prompt='Type the password that secures your validator keystore(s)',
         ),
         click.option(
+            '--withdrawal_pk',
+            default='',
+            help=('Custom private key to generate withdrawal credentials. This one will be used for all generated keys.'),
+        ),
+        click.option(
+            '--withdrawal_credentials',
+            default='',
+            help=('Custom withdrawal credentials. Overrides withdrawal_pk. This one will be used for all generated keys.'),
+        ),
+        click.option(
             '--quiet', '-q',
-            help='Suppress the output of useless stuff.',
+            help=('Suppress the output of useless stuff.'),
             is_flag=True,
         ),
     ]
